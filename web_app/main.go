@@ -4,7 +4,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -48,6 +47,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	// fmt.Fprintf(w, "<h1>%s</h1><div>%s</div>", p.Title, p.Body) //htmlのページとして表示される．
 	renderTemplate(w, "view", p)
 }
+
 func editHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len("/edit/"):] //スライス的な使い方？
 	// println(title)
@@ -60,13 +60,14 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "edit", p)
 }
 
-type testHandler struct {
-}
+// httpハンドラの作成
+// type testHandler struct {
+// }
 
-func (th testHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("yeah")
-	fmt.Fprintf(w, "<div>I am testHandler</div>") //htmlのページとして表示される．
-}
+// func (th testHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+// 	fmt.Println("yeah")
+// 	fmt.Fprintf(w, "<div>I am testHandler</div>") //htmlのページとして表示される．
+// }
 
 // ウェブサーバの立ち上げ
 func main() {
@@ -74,13 +75,15 @@ func main() {
 	// http://localhost:8080/view/へのアクセスがあった場合に，viewHandlerを実行する．
 	http.HandleFunc("/view/", viewHandler)
 	http.HandleFunc("/edit/", editHandler)
-	// :8080が生きている限り，サーバを立ち上げ続ける？
+	// http.ListenAndServe: :8080が生きている限り，サーバを立ち上げ続ける？
+	// 第一引数：ポート
+	// 第二引数：ハンドラ
+	// log.Fatal：errorがあった場合に，ログとして表示する関数．
 	log.Fatal(http.ListenAndServe(":8080", nil))
 
 	// httpハンドラの作成
 	// var testHandler http.Handler
 	// log.Fatal(http.ListenAndServe(":8080", testHandler))
 	// 実行はできるが，ハンドラは動かない．これはいつ実行される？
-	// log.Fatal：errorがあった場合に，ログとして表示する関数．
 
 }
