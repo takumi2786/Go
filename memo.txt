@@ -1,0 +1,73 @@
+覚書
+・型の確認
+　fmt.Println(reflect.TypeOf(val))
+  で確認可能．
+
+・オプショナル引数の扱い
+　https://raahii.github.io/posts/optional-parameters-in-go/
+
+
+・GOによる株価の取得
+
+
+  talib
+   Goにより，株価を取得，解析可能なライブラリ．
+
+
+
+・グラフのプロット
+// グラフの作成
+p, err := plot.New()
+if err != nil {
+	panic(err)
+}
+// 表示項目の設定
+p.Title.Text = "only english title"
+p.X.Label.Text = "X axis"
+p.Y.Label.Text = "Y axis"
+
+fmt.Println(spy.Open[0])
+// fmt.Println(GetType(spy.Open[0]))
+fmt.Println(reflect.TypeOf(spy.Open[0]))
+fmt.Println(reflect.TypeOf(spy.Date[0]))
+
+dateArr := spy.Date
+OpenArr := spy.Open
+dataNum := len(dateArr) //データ数
+
+// 構造体の宣言
+type xyAxis struct {
+	x float64
+	y float64
+}
+// インスタンスの生成
+nums := []xyAxis{
+	{1, 11},
+	{2, 33},
+	{3, 22},
+	{4, 55},
+	{5, 44},
+	{6, 77},
+	{7, 66},
+	{8, 99},
+	{9, 88},
+}
+
+pts := make(plotter.XYs, dataNum) //XYs型の変数を宣言
+
+// 値を代入
+for i, val := range OpenArr {
+	pts[i].X = val
+}
+
+// グラフを描画
+err = plotutil.AddLinePoints(p, pts)
+if err != nil {
+	panic(err)
+}
+
+// 描画結果を保存
+// "5*vg.Inch" の数値を変更すれば，保存する画像のサイズを調整できます．
+if err := p.Save(5*vg.Inch, 5*vg.Inch, "sample1.png"); err != nil {
+	panic(err)
+}

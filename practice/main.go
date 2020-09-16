@@ -457,7 +457,7 @@ func testTime() {
 
 // regex
 // 要は，正規表現
-func main() {
+func testRegex() {
 	match, _ := regexp.MatchString("a([a-z]+)e", "apple")
 	fmt.Println(match)
 
@@ -466,4 +466,37 @@ func main() {
 	st := r.FindStringSubmatch("apple")
 	// 正規表現がマッチした順番で，スライスに格納される．
 	fmt.Println(st[1])
+}
+
+// オプショナル引数を持つ関数の作成
+type OptVals struct {
+	Val string
+}
+
+type option func(*OptVals) //optionという，ハンドラ？を作成．引数にGreetOptsを持つ．
+
+// GreetingWord引数を設定する関数
+func SetOptVal(v string) option {
+	return func(g *OptVals) {
+		g.Val = v
+	}
+}
+
+func Greet(name string, opts ...option) {
+	// デフォルトパラメータを定義
+	g := &OptVals{
+		Val: "Hello",
+	}
+
+	// ユーザーから渡された値だけ上書き
+	for _, opt := range opts {
+		opt(g)
+	}
+
+	fmt.Printf("%s, %s!\n", g.Val, name)
+}
+
+func main() {
+	Greet("gopher")                   // Hello, gopher!
+	Greet("gopher", SetOptVal("Hey")) // Hey, gopher!// 可変長なので，複数渡すこともできる．
 }
