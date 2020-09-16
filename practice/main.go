@@ -437,7 +437,6 @@ func testReceiver() {
 
 	v.Scale(10)
 	fmt.Println(v.Area())
-
 }
 
 // Q1
