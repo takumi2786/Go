@@ -2,7 +2,12 @@
 
 package main //このファイル内をimportする時の名前になる．
 
-import "fmt" // 命名規則
+import (
+	"fmt" // 命名規則
+	"regexp"
+	"time"
+)
+
 // 変数でも関数でも，
 // GOでは，アンダースコアではなく，MixedCapsかmixedCapsとして書かなければならない．
 //　ここで，頭文字が大文字の変数や関数は，外部ファイルから呼び出すことができる．(publicになる)
@@ -444,10 +449,22 @@ func (v Vertex) String() string {
 	return fmt.Sprintf("X is %d,Y is %d", v.X, v.Y)
 }
 
+// 便利な標準パッケージ
+// time
+func testTime() {
+	t := time.Now()
+	fmt.Println(t.Format(time.RFC3339))
+}
+
+// regex
+// 要は，正規表現
 func main() {
+	match, _ := regexp.MatchString("a([a-z]+)e", "apple")
+	fmt.Println(match)
 
-	v := Vertex{3, 4}
-	fmt.Println(v.Plus())
-	fmt.Println(v)
-
+	r := regexp.MustCompile("a([a-z]+)e")
+	// ms := r.MatchString("apple")
+	st := r.FindStringSubmatch("apple")
+	// 正規表現がマッチした順番で，スライスに格納される．
+	fmt.Println(st[1])
 }

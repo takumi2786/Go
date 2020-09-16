@@ -4,10 +4,12 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"regexp"
 )
 
 // Pageという構造体を作成
@@ -32,15 +34,27 @@ func loadPage(title string) (*Page, error) {
 	return &Page{Title: title, Body: body}, nil
 }
 
+// キャッシング
+// テンプレートファイルを予めよみこんでおき，読み込みを早くする．
+// つまり，ページの更新ごとに，読み込みし直さない．
+// templatesという変数にhtmlファイルを読み込む．
+// この処理は，サーバを立ち上げた時に実行される．
+var templates = template.Must(template.ParseFiles("edit.html", "view.html"))
+
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
 	// p:テンプレートに渡す構造体．
 	// w:http.ResponseWriter ここに何かを書くと，ページに反映される．
-	t, _ := template.ParseFiles(tmpl + ".html")
-	t.Execute(w, p)
+	// t, _ := template.ParseFiles(tmpl + ".html")
+	// t.Execute(w, p)
+
+	// キャッシングを利用した読み込み
+	err := templates.ExecuteTemplate(w, tmpl+".html", p) //list変数templatesの中から，名前にマッチするものを読み込む．
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
-func viewHandler(w http.ResponseWriter, r *http.Request) {
-	title := r.URL.Path[len("/view/"):] //スライス的な使い方？
+func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 	// println(title)
 	p, err := loadPage(title)
 	if err != nil {
@@ -51,8 +65,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "view", p) // これは，テンプレートファイルをコンパイルして，wに情報を書き込んでいる．
 }
 
-func editHandler(w http.ResponseWriter, r *http.Request) {
-	title := r.URL.Path[len("/edit/"):] //スライス的な使い方？
+func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 	// println(title)
 	p, err := loadPage(title)
 	if err != nil { //editの場合は，ページファイルが存在しなくても，新規で作成
@@ -62,9 +75,9 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "edit", p) // これは，テンプレートファイルをコンパイルして，wに情報を書き込んでいる．
 }
 
-func saveHandler(w http.ResponseWriter, r *http.Request) {
-	title := r.URL.Path[len("/save/"):] //スライス的な使い方？
-	body := r.FormValue("body")         //name==bodyのフォーム情報を取得
+func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
+
+	body := r.FormValue("body") //name==bodyのフォーム情報を取得
 	p := &Page{Title: title, Body: []byte(body)}
 	err := p.save()
 	if err != nil {
@@ -76,13 +89,29 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
+var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-z0-9]+)$")
+
+//ハンドラ関数を処理ごとに作成するイメージ
+func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		m := validPath.FindStringSubmatch(r.URL.Path)
+		fmt.Println(m)
+		if m == nil {
+			http.NotFound(w, r)
+			return
+		}
+		fmt.Println("aaaa")
+		fn(w, r, m[2])
+	}
+}
+
 // ウェブサーバの立ち上げ
 func main() {
 	// /view/配下のルーティングに相当する．
 	// http://localhost:8080/view/へのアクセスがあった場合に，viewHandlerを実行する．
-	http.HandleFunc("/view/", viewHandler)
-	http.HandleFunc("/edit/", editHandler)
-	http.HandleFunc("/save/", saveHandler)
+	http.HandleFunc("/view/", makeHandler(viewHandler))
+	http.HandleFunc("/edit/", makeHandler(editHandler))
+	http.HandleFunc("/save/", makeHandler(saveHandler))
 
 	// http.ListenAndServe: :8080が生きている限り，サーバを立ち上げ続ける？
 	// 第一引数：ポート
