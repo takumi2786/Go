@@ -16,13 +16,17 @@ import (
 // Goによるグラフの描画
 // https://qiita.com/RuyPKG/items/0a569953e9e24870f527
 
+// CSVファイルの取得
+// https://kabuoji3.com/stock/
+// ここでダウンロードできる。
+// ただし、"の削除、日本語文字の差し替えが必要
 func main() {
+	// var quote quote.Quote
+
 	// Yahooのサイトからspyの値をスクレイピングで取得する関数
 	// quote, _ := quote.NewQuoteFromYahoo("spy", "2016-01-01", "2016-12-01", quote.Daily, true)
 	// CSVからの読み込み
-	quote, _ := quote.NewQuoteFromCSVFileDateFormat("test", "./stock_data/EskeyEL_2020.csv", "2006-01-02")
-
-	// fmt.Println(quote.CSV())
+	quote, _ := quote.NewQuoteFromCSVFileDateFormat("eskeyEL", "./stock_data/EskeyEL_2020.csv", "2006-01-02")
 
 	// 棒グラフの作成
 	dateArr := quote.Date   //日付
