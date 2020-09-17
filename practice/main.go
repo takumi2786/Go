@@ -6,6 +6,8 @@ import (
 	"fmt" // 命名規則
 	"regexp"
 	"time"
+
+	"./mylib"
 )
 
 // 変数でも関数でも，
@@ -496,7 +498,16 @@ func Greet(name string, opts ...option) {
 	fmt.Printf("%s, %s!\n", g.Val, name)
 }
 
-func main() {
+func testOptVal() {
 	Greet("gopher")                   // Hello, gopher!
 	Greet("gopher", SetOptVal("Hey")) // Hey, gopher!// 可変長なので，複数渡すこともできる．
+}
+
+// ライブラリの自作
+// 基本は、packageごとにディレクトリを分ける。
+// そのpackage名(ディレクトリ名)によって、中身の関数や構造体を呼び出すことが可能。
+
+func main() {
+	s := []int{1, 2, 3, 4, 5}
+	fmt.Println(mylib.Average(s))
 }
